@@ -1,29 +1,29 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@types/websocket': '==1.0.5'
+  '@types/websocket': ^1.0.10
   typescript: ^5.3.3
-  websocket: '==1.0.34'
+  websocket: ^1.0.34
 
 dependencies:
   websocket: 1.0.34
 
 devDependencies:
-  '@types/websocket': 1.0.5
+  '@types/websocket': 1.0.10
   typescript: 5.3.3
 
 packages:
 
-  /@types/node/20.10.4:
-    resolution: {integrity: sha512-D08YG6rr8X90YB56tSIuBaddy/UXAA9RKJoFvrsnogAum/0pmjkgi4+2nx96A330FmioegBWmEYQ+syqCFaveg==}
+  /@types/node/20.10.5:
+    resolution: {integrity: sha512-nNPsNE65wjMxEKI93yOP+NPGGBJz/PoN3kZsVLee0XMiJolxSekEVD8wRwBUBqkwc7UWop0edW50yrCQW4CyRw==}
     dependencies:
       undici-types: 5.26.5
     dev: true
 
-  /@types/websocket/1.0.5:
-    resolution: {integrity: sha512-NbsqiNX9CnEfC1Z0Vf4mE1SgAJ07JnRYcNex7AJ9zAVzmiGHmjKFEk7O4TJIsgv2B1sLEb6owKFZrACwdYngsQ==}
+  /@types/websocket/1.0.10:
+    resolution: {integrity: sha512-svjGZvPB7EzuYS94cI7a+qhwgGU1y89wUgjT6E2wVUfmAGIvRfT7obBvRtnhXCSsoMdlG4gBFGE7MfkIXZLoww==}
     dependencies:
-      '@types/node': 20.10.4
+      '@types/node': 20.10.5
     dev: true
 
   /bufferutil/4.0.8:

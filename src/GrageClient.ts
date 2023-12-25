@@ -1,9 +1,9 @@
 import {ChannelMessage, ConnectMessage, DataMessage, Message, Ping, RequestPing} from "./lib";
 
-import {IMessageEvent} from 'websocket';
 import {GrageAPI, GrageDeviceStatus} from "./GrageAPI";
-import {ConnectionState, IWebsocket} from "./IWebsocket";
-import StableWs from "./stableWs";
+import {ConnectionState, IWebsocket, WebsocketMsg} from "./IWebsocket";
+import StableWs from "./StableWs";
+
 
 function isRequestPing(m: Message): m is RequestPing {
     return m.type === 'rping';
@@ -49,16 +49,16 @@ export default class GrageClient implements GrageAPI {
         timeout: 10000, pingPeriod: 4500, checkPeriod: 1000
     }
 
-    private debug(...args: any) {
+    private debug(...args: any[]) {
         console.log(...args)
     }
 
-    private handleMsg(evt: IMessageEvent) {
+    private handleMsg(evt: WebsocketMsg) {
         let m;
         try {
-            m = JSON.parse(evt.data as string) as Message;
+            m = JSON.parse(evt as string) as Message;
         } catch (e) {
-            console.error('Failed parse message ', e, evt.data)
+            console.error('Failed parse message ', e, evt)
             return;
         }
 
@@ -108,7 +108,7 @@ export default class GrageClient implements GrageAPI {
         }
     }
 
-    begin(url) {
+    begin(url:string) {
 
         const a = this.ws.begin(url)
         const b = this.ws.onMessage(this.handleMsg.bind(this))
@@ -120,10 +120,9 @@ export default class GrageClient implements GrageAPI {
         }
     }
 
-    sendImpl(id: string, m: Message): void {
-
+    sendImpl(m: Message): void {
         let o = JSON.stringify(m);
-        this.ws.send(m)
+        this.ws.send(o)
     }
 
     send(id: string, data: any): void {
@@ -134,7 +133,7 @@ export default class GrageClient implements GrageAPI {
             fromDevice: false,
         };
 
-        this.sendImpl(id, m);
+        this.sendImpl(m);
     }
 
     private sendConnect(id: string) {
@@ -144,7 +143,7 @@ export default class GrageClient implements GrageAPI {
             type: "connect",
             id,
         };
-        this.ws.send(m);
+        this.sendImpl(m);
         this.channels[id].isConnected = true;
     }
 
@@ -173,7 +172,7 @@ export default class GrageClient implements GrageAPI {
             fromDevice: false
         };
 
-        this.sendImpl(id, m);
+        this.sendImpl(m);
         this.channels[id].lastPingTime = Date.now()
         this.channels[id].pingInFlight = true
     }

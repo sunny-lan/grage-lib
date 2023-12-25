@@ -4,14 +4,14 @@
     "target": "es2017",
     "sourceMap": true,
     "inlineSources": true,
-    "lib": [ "es2017"],
+    "lib": [ "es2017", "dom"],
     "moduleResolution": "node",
     "noImplicitAny": true,
     "strictNullChecks": true,
     "outDir": "dist",
 
-    "include": [
-      "src/**/*.ts"
-    ]
-  }
+  },
+  "include": [
+    "src/**/*.ts"
+  ]
 }

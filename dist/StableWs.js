@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const IWebsocket_1 = require("./IWebsocket");
+const websocket_1 = require("websocket");
+const w3cwebsocket = websocket_1.w3cwebsocket;
 class StableWs {
     constructor() {
         this.connectionState = IWebsocket_1.ConnectionState.Disconnected;
@@ -59,4 +61,4 @@ class StableWs {
     }
 }
 exports.default = StableWs;
-//# sourceMappingURL=stableWs.js.map
+//# sourceMappingURL=StableWs.js.map

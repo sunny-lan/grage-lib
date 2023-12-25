@@ -1,16 +1,22 @@
-import {ConnectionState, IWebsocket, WebsocketMsg} from "./IWebsocket";
-import websocket from 'we'
+import {
+    ConnectionState,
+    IW3CWebsocket,
+    IWebsocket,
+    IW3CWebsocketObj,
+    WebsocketMsg,
+    ConnStateListener, MsgListener
+} from "./IWebsocket";
+import {w3cwebsocket as _W3CWebSocket} from "websocket";
 
-type ConnStateListener = (state: ConnectionState) => void;
-type MsgListener = (data: WebsocketMsg) => void;
+const w3cwebsocket:IW3CWebsocket=_W3CWebSocket;
 
 export default class StableWs implements IWebsocket {
     private connectionState: ConnectionState = ConnectionState.Disconnected
 
-    declare private ws_?: any
+    declare private ws_?: IW3CWebsocketObj
     private url: string
 
-    private ws(): w3cwebsocket {
+    private ws(): IW3CWebsocketObj {
         if (this.ws_?.readyState === w3cwebsocket.CLOSING || this.ws_?.readyState === w3cwebsocket.CLOSED) {
             this.terminateWs()
         }

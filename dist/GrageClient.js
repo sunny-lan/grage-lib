@@ -2,7 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const GrageAPI_1 = require("./GrageAPI");
 const IWebsocket_1 = require("./IWebsocket");
-const stableWs_1 = require("./stableWs");
+const StableWs_1 = require("./StableWs");
 function isRequestPing(m) {
     return m.type === 'rping';
 }
@@ -18,7 +18,7 @@ function isDataMessage(m) {
 class GrageClient {
     constructor() {
         this.channels = {};
-        this.ws = new stableWs_1.default();
+        this.ws = new StableWs_1.default();
         this.options = {
             timeout: 10000, pingPeriod: 4500, checkPeriod: 1000
         };
@@ -29,10 +29,10 @@ class GrageClient {
     handleMsg(evt) {
         let m;
         try {
-            m = JSON.parse(evt.data);
+            m = JSON.parse(evt);
         }
         catch (e) {
-            console.error('Failed parse message ', e, evt.data);
+            console.error('Failed parse message ', e, evt);
             return;
         }
         this.debug('[recv]', m);
@@ -85,9 +85,9 @@ class GrageClient {
             clearInterval(c);
         };
     }
-    sendImpl(id, m) {
+    sendImpl(m) {
         let o = JSON.stringify(m);
-        this.ws.send(m);
+        this.ws.send(o);
     }
     send(id, data) {
         const m = {
@@ -96,7 +96,7 @@ class GrageClient {
             id,
             fromDevice: false,
         };
-        this.sendImpl(id, m);
+        this.sendImpl(m);
     }
     sendConnect(id) {
         //send channel connect message
@@ -104,7 +104,7 @@ class GrageClient {
             type: "connect",
             id,
         };
-        this.ws.send(m);
+        this.sendImpl(m);
         this.channels[id].isConnected = true;
     }
     ensureExists(id) {
@@ -129,7 +129,7 @@ class GrageClient {
             id,
             fromDevice: false
         };
-        this.sendImpl(id, m);
+        this.sendImpl(m);
         this.channels[id].lastPingTime = Date.now();
         this.channels[id].pingInFlight = true;
     }
@@ -165,4 +165,4 @@ class GrageClient {
     }
 }
 exports.default = GrageClient;
-//# sourceMappingURL=clientv2.js.map
+//# sourceMappingURL=GrageClient.js.map
