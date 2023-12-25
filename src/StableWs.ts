@@ -1,32 +1,27 @@
 import {
     ConnectionState,
+    ConnStateListener,
     IW3CWebsocket,
-    IWebsocket,
     IW3CWebsocketObj,
-    WebsocketMsg,
-    ConnStateListener, MsgListener
+    IWebsocket,
+    MsgListener,
+    W3CWebsocketMsg,
+    WebsocketMsg
 } from "./IWebsocket";
 import {w3cwebsocket as _W3CWebSocket} from "websocket";
 
 const w3cwebsocket:IW3CWebsocket=_W3CWebSocket;
+
+const noop=()=>{};
 
 export default class StableWs implements IWebsocket {
     private connectionState: ConnectionState = ConnectionState.Disconnected
 
     declare private ws_?: IW3CWebsocketObj
     private url: string
+    private connStateListeners: Set<ConnStateListener> = new Set<ConnStateListener>()
+    private msgListeners: Set<MsgListener> = new Set<MsgListener>();
 
-    private ws(): IW3CWebsocketObj {
-        if (this.ws_?.readyState === w3cwebsocket.CLOSING || this.ws_?.readyState === w3cwebsocket.CLOSED) {
-            this.terminateWs()
-        }
-
-        if (this.ws_ === undefined) {
-            this.ws_ = new w3cwebsocket(this.url)
-            this.ws_.onmessage = this.handleMessage.bind(this)
-        }
-        return this.ws_
-    }
 
     begin(url: string): () => void {
         this.url = url
@@ -34,25 +29,28 @@ export default class StableWs implements IWebsocket {
         return this.terminateWs.bind(this);
     }
 
-    private terminateWs() {
-        // @ts-ignore
-        this.ws_.onmessage = null;
-        this.ws_ = undefined;
-        this.updateConnState(ConnectionState.Disconnected)
-    }
-
     getConnectionState(): ConnectionState {
         return this.connectionState
     }
-
-
-    private connStateListeners: Set<ConnStateListener> = new Set<ConnStateListener>()
 
     onConnectionStateChanged(callback: ConnStateListener): () => void {
         callback(this.getConnectionState())
         this.connStateListeners.add(callback)
         return () => this.connStateListeners.delete(callback)
     }
+
+    onMessage(callback: MsgListener): () => void {
+        this.msgListeners.add(callback)
+        return () => this.msgListeners.delete(callback)
+    }
+
+    send(data: WebsocketMsg): void {
+        if(this.connectionState===ConnectionState.Disconnected)
+            throw Error('Send called while disconnected')
+
+        this.ws().send(data)
+    }
+
 
     private updateConnState(state: ConnectionState) {
         if (this.connectionState != state) {
@@ -63,21 +61,38 @@ export default class StableWs implements IWebsocket {
         }
     }
 
-    private msgListeners: Set<MsgListener> = new Set<MsgListener>();
+    private ws(): IW3CWebsocketObj {
+        if (this.ws_?.readyState === w3cwebsocket.CLOSING || this.ws_?.readyState === w3cwebsocket.CLOSED) {
+            this.terminateWs()
+        }
 
-    onMessage(callback: MsgListener): () => void {
-        this.msgListeners.add(callback)
-        return () => this.msgListeners.delete(callback)
+        if (this.ws_ === undefined) {
+            this.ws_ = new w3cwebsocket(this.url)
+            this.ws_.onmessage = this.handleMessage.bind(this)
+            this.ws_.onopen = ()=>this.updateConnState(ConnectionState.Connected)
+            this.ws_.onclose= this.terminateWs.bind(this)
+            this.ws_.onerror=(err)=>{
+                console.error(err)
+                this.terminateWs()
+            }
+        }
+        return this.ws_
     }
 
 
-    send(data: WebsocketMsg): void {
-        this.ws().send(data)
+    private terminateWs() {
+        this.ws_!.onmessage = null;
+        this.ws_!.onclose=noop;
+        this.ws_!.onopen=noop;
+        this.ws_!.onerror=noop;
+
+        this.ws_ = undefined;
+        this.updateConnState(ConnectionState.Disconnected)
     }
 
-    private handleMessage(data: WebsocketMsg) {
+    private handleMessage(data: W3CWebsocketMsg) {
         for (const listener of this.msgListeners) {
-            listener(data)
+            listener(data.data)
         }
     }
 }

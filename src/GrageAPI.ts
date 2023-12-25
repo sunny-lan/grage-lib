@@ -1,4 +1,3 @@
-import {Message} from "./lib";
 
 export enum GrageDeviceStatus {
     ALIVE, DEAD, NETWORK_DISCONNECTED
@@ -16,7 +15,7 @@ export interface GrageAPI{
      * @param deviceId
      * @param callback
      */
-    subscribe(deviceId:string, callback:(msg:Message)=>void):()=>void
+    subscribe(deviceId:string, callback:(msg:any)=>void):()=>void
 
     /**
      * Send message to device

@@ -1,3 +1,5 @@
+
+
 export type WebsocketMsg =ArrayBufferView | ArrayBuffer | string;
 export enum ConnectionState{
     Connected,
@@ -19,9 +21,17 @@ export type W3CMsgListener = (data: W3CWebsocketMsg) => void;
 export interface IW3CWebsocketObj {
     send(data:WebsocketMsg):void
     readyState:number
+    onopen: () => void;
     onmessage:W3CMsgListener|null
-}
+    onerror: (error: Error) => void;
 
+    onclose: (event: IW3CCloseEvent) => void;
+}
+export interface IW3CCloseEvent {
+    code: number;
+    reason: string;
+    wasClean: boolean;
+}
 export interface IW3CWebsocket{
     CLOSING:number
     CLOSED:number

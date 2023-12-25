@@ -46,35 +46,112 @@ export default class GrageClient implements GrageAPI {
     private ws: IWebsocket = new StableWs();
 
     options = {
-        timeout: 10000, pingPeriod: 4500, checkPeriod: 1000
+        timeout: 10000, pingPeriod: 4500, checkPeriod: 1000, debug:false
     }
 
-    private debug(...args: any[]) {
-        console.log(...args)
+    begin(url:string) {
+
+        const a = this.ws.begin(url)
+        const d = this.ws.onConnectionStateChanged(this.handleWsStateChanged.bind(this))
+        const b = this.ws.onMessage(this.handleMsg.bind(this))
+        const c = setInterval(this.checkChannelTimeouts.bind(this), this.options.checkPeriod)
+        return function () {
+            a();
+            d();
+            b();
+            clearInterval(c)
+        }
+    }
+
+    sendImpl(m: Message): void {
+        this.debug('[Send]', m)
+
+        let o = JSON.stringify(m);
+        this.ws.send(o)
+    }
+
+    send(id: string, data: any, fromDevice=false): void {
+        const m: DataMessage = {
+            type: "data",
+            data,
+            id,
+            fromDevice,
+        };
+
+        this.sendImpl(m);
+    }
+
+    requestPing(id: string) {
+        this.ensureChannelExists(id)
+        //send ping
+        const m: RequestPing = {
+            type: "rping",
+            id,
+            fromDevice: false
+        };
+
+        this.sendImpl(m);
+        this.channels[id].lastPingTime = Date.now()
+        this.channels[id].pingInFlight = true
+    }
+
+    subscribe(id: string, callback: (msg: any) => void): () => void {
+        this.ensureChannelExists(id)
+
+        this.checkChannelConnected(id)
+
+        this.channels[id].dataListeners.add(callback)
+        return () => this.channels[id].dataListeners.delete(callback)
+    }
+
+
+    onStatusChanged(id: string, callback: (alive: GrageDeviceStatus) => void): () => void {
+        this.ensureChannelExists(id)
+        this.checkChannelConnected(id)
+
+        callback(this.channels[id].curStatus)
+        this.channels[id].deviceStatusListeners.add(callback)
+        return () => {
+            this.channels[id].deviceStatusListeners.delete(callback)
+        };
+    }
+
+    private checkChannelConnected(id:string){
+        if(this.ws.getConnectionState()===ConnectionState.Connected) {
+            if (!this.channels[id].isConnected) {
+                this.subscribeToIDImpl(id)
+            }
+        }else{
+            this.channels[id].isConnected=false
+            this.setDeviceState(id, GrageDeviceStatus.NETWORK_DISCONNECTED)
+        }
     }
 
     private handleMsg(evt: WebsocketMsg) {
+        this.debug('[WS Recv]', evt)
+
         let m;
         try {
             m = JSON.parse(evt as string) as Message;
         } catch (e) {
-            console.error('Failed parse message ', e, evt)
+            console.error('Failed to parse message ', e, evt)
             return;
         }
 
-        this.debug('[recv]', m);
 
         //ignore messages from other browsers, ignore non subscribed messages
-        if (isChannelMessage(m) && m.fromDevice && this.channels.hasOwnProperty(m.id)) {
-            const channel = this.channels[m.id];
-            //since this device just sent a message,
-            //it must be alive
-            this.setDeviceState(m.id, GrageDeviceStatus.ALIVE);
+        if (isChannelMessage(m) ) {
+            if(m.fromDevice && this.channels.hasOwnProperty(m.id)) {
+                const channel = this.channels[m.id];
+                //since this device just sent a message,
+                //it must be alive
+                this.setDeviceState(m.id, GrageDeviceStatus.ALIVE);
 
-            if (isDataMessage(m)) {
-                //send to every listener in the proper channel
-                for (const listener of channel.dataListeners) {
-                    listener(m.data);
+                if (isDataMessage(m)) {
+                    //send to every listener in the proper channel
+                    for (const listener of channel.dataListeners) {
+                        listener(m.data);
+                    }
                 }
             }
         } else {
@@ -82,7 +159,7 @@ export default class GrageClient implements GrageAPI {
         }
     }
 
-    private checkConnections() {
+    private checkChannelTimeouts() {
         const now = Date.now()
         for (const [id, channel] of Object.entries(this.channels)) {
             if (this.ws.getConnectionState() === ConnectionState.Connected) {
@@ -108,35 +185,7 @@ export default class GrageClient implements GrageAPI {
         }
     }
 
-    begin(url:string) {
-
-        const a = this.ws.begin(url)
-        const b = this.ws.onMessage(this.handleMsg.bind(this))
-        const c = setInterval(this.checkConnections.bind(this), this.options.checkPeriod)
-        return function () {
-            a();
-            b();
-            clearInterval(c)
-        }
-    }
-
-    sendImpl(m: Message): void {
-        let o = JSON.stringify(m);
-        this.ws.send(o)
-    }
-
-    send(id: string, data: any): void {
-        const m: DataMessage = {
-            type: "data",
-            data,
-            id,
-            fromDevice: false,
-        };
-
-        this.sendImpl(m);
-    }
-
-    private sendConnect(id: string) {
+    private subscribeToIDImpl(id: string) {
 
         //send channel connect message
         const m: ConnectMessage = {
@@ -147,7 +196,7 @@ export default class GrageClient implements GrageAPI {
         this.channels[id].isConnected = true;
     }
 
-    private ensureExists(id: string) {
+    private ensureChannelExists(id: string) {
         if (!this.channels.hasOwnProperty(id)) {
             //initialize channelListeners
             this.channels[id] = {
@@ -163,44 +212,8 @@ export default class GrageClient implements GrageAPI {
         }
     }
 
-    requestPing(id: string) {
-        this.ensureExists(id)
-        //send ping
-        const m: RequestPing = {
-            type: "rping",
-            id,
-            fromDevice: false
-        };
-
-        this.sendImpl(m);
-        this.channels[id].lastPingTime = Date.now()
-        this.channels[id].pingInFlight = true
-    }
-
-    subscribe(id: string, callback: (msg: Message) => void): () => void {
-        this.ensureExists(id)
-
-
-        if (!this.channels[id].isConnected) {
-            this.sendConnect(id)
-        }
-
-        this.channels[id].dataListeners.add(callback)
-        return () => this.channels[id].dataListeners.delete(callback)
-    }
-
-    onStatusChanged(id: string, callback: (alive: GrageDeviceStatus) => void): () => void {
-        this.ensureExists(id)
-        callback(this.channels[id].curStatus)
-        this.channels[id].deviceStatusListeners.add(callback)
-        return () => {
-            this.channels[id].deviceStatusListeners.delete(callback)
-        };
-    }
-
-
     private setDeviceState(id: string, newState: GrageDeviceStatus) {
-        this.ensureExists(id)
+        this.ensureChannelExists(id)
         const channel = this.channels[id]
         if (channel.curStatus !== newState) {
             channel.curStatus = newState;
@@ -213,5 +226,18 @@ export default class GrageClient implements GrageAPI {
                 listener(newState)
             }
         }
+    }
+
+    private handleWsStateChanged(state:ConnectionState) {
+        this.debug('[WS State]', ConnectionState[state])
+
+        for(const id of Object.keys(this.channels)){
+            this.checkChannelConnected(id)
+        }
+    }
+
+    private debug(...args: any[]) {
+        if(this.options.debug)
+        console.log(...args)
     }
 }
