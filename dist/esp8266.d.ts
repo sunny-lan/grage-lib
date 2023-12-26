@@ -1,20 +1,20 @@
-declare enum PinMode {
+export declare enum PinMode {
     INPUT = 0,
     INPUT_PULLUP = 2,
     OUTPUT = 1
 }
-declare enum InterruptMode {
+export declare enum InterruptMode {
     RISING = 1,
     FALLING = 2,
     CHANGE = 3,
     ONLOW = 4,
     ONHIGH = 5
 }
-declare enum LogicLevel {
+export declare enum LogicLevel {
     HIGH = 1,
     LOW = 0
 }
-declare enum Pin {
+export declare enum Pin {
     D0 = 16,
     D1 = 5,
     D2 = 4,

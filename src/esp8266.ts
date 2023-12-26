@@ -1,10 +1,10 @@
-enum PinMode {
+export enum PinMode {
     INPUT = 0x00,
     INPUT_PULLUP = 0x02,
     OUTPUT = 0x01,
 }
 
-enum InterruptMode {
+export enum InterruptMode {
     RISING = 0x01,
     FALLING = 0x02,
     CHANGE = 0x03,
@@ -12,12 +12,12 @@ enum InterruptMode {
     ONHIGH = 0x05,
 }
 
-enum LogicLevel {
+export enum LogicLevel {
     HIGH = 0x01,
     LOW = 0x00,
 }
 
-enum Pin {
+export enum Pin {
     D0 = 16,
     D1 = 5,
     D2 = 4,

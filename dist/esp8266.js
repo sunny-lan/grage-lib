@@ -1,11 +1,12 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Pin = exports.LogicLevel = exports.InterruptMode = exports.PinMode = void 0;
 var PinMode;
 (function (PinMode) {
     PinMode[PinMode["INPUT"] = 0] = "INPUT";
     PinMode[PinMode["INPUT_PULLUP"] = 2] = "INPUT_PULLUP";
     PinMode[PinMode["OUTPUT"] = 1] = "OUTPUT";
-})(PinMode || (PinMode = {}));
+})(PinMode || (exports.PinMode = PinMode = {}));
 var InterruptMode;
 (function (InterruptMode) {
     InterruptMode[InterruptMode["RISING"] = 1] = "RISING";
@@ -13,12 +14,12 @@ var InterruptMode;
     InterruptMode[InterruptMode["CHANGE"] = 3] = "CHANGE";
     InterruptMode[InterruptMode["ONLOW"] = 4] = "ONLOW";
     InterruptMode[InterruptMode["ONHIGH"] = 5] = "ONHIGH";
-})(InterruptMode || (InterruptMode = {}));
+})(InterruptMode || (exports.InterruptMode = InterruptMode = {}));
 var LogicLevel;
 (function (LogicLevel) {
     LogicLevel[LogicLevel["HIGH"] = 1] = "HIGH";
     LogicLevel[LogicLevel["LOW"] = 0] = "LOW";
-})(LogicLevel || (LogicLevel = {}));
+})(LogicLevel || (exports.LogicLevel = LogicLevel = {}));
 var Pin;
 (function (Pin) {
     Pin[Pin["D0"] = 16] = "D0";
@@ -33,7 +34,7 @@ var Pin;
     Pin[Pin["D9"] = 3] = "D9";
     Pin[Pin["D10"] = 1] = "D10";
     Pin[Pin["_A0"] = 17] = "_A0";
-})(Pin || (Pin = {}));
+})(Pin || (exports.Pin = Pin = {}));
 // @ts-ignore
 exports.default = {
     LogicLevel,
