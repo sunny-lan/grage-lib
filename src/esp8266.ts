@@ -32,39 +32,35 @@ export enum Pin {
     _A0 = 17,
 }
 
-export type StateData={
-    pinReadings:number[]
+export type StateData = {
+    pinReadings: number[]
 }
 
-// @ts-ignore
-export default {
-    LogicLevel,
-    PinMode,
-    InterruptMode,
-    Pin,
+export function pinMode(pin: Pin, mode: PinMode) {
+    return {
+        command: 'pinMode',
+        pin, mode,
+    }
+}
 
-    pinMode(pin: Pin, mode: PinMode) {
-        return {
-            command: 'pinMode',
-            pin, mode,
-        }
-    },
-    digitalWrite(pin: Pin, value: LogicLevel) {
-        return {
-            command: 'digitalWrite',
-            pin, value,
-        };
-    },
-    attachInterrupt(pin: Pin, mode: InterruptMode) {
-        return {
-            command: 'attachInterrupt',
-            pin, mode,
-        };
-    },
-    detachInterrupt(pin: Pin) {
-        return {
-            command: 'detachInterrupt',
-            pin
-        };
-    },
-};
+export function digitalWrite(pin: Pin, value: LogicLevel) {
+    return {
+        command: 'digitalWrite',
+        pin, value,
+    };
+}
+
+export function attachInterrupt(pin: Pin, mode: InterruptMode) {
+    return {
+        command: 'attachInterrupt',
+        pin, mode,
+    };
+}
+
+export function detachInterrupt(pin: Pin) {
+    return {
+        command: 'detachInterrupt',
+        pin
+    };
+}
+

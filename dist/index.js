@@ -17,5 +17,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.GrageClient = exports.esp8266 = void 0;
 exports.esp8266 = require("./esp8266");
 __exportStar(require("./GrageAPI"), exports);
-exports.GrageClient = require("./GrageClient");
+var GrageClient_1 = require("./GrageClient");
+Object.defineProperty(exports, "GrageClient", { enumerable: true, get: function () { return GrageClient_1.default; } });
 //# sourceMappingURL=index.js.map

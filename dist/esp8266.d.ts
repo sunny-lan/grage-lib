@@ -31,29 +31,22 @@ export declare enum Pin {
 export type StateData = {
     pinReadings: number[];
 };
-declare const _default: {
-    LogicLevel: typeof LogicLevel;
-    PinMode: typeof PinMode;
-    InterruptMode: typeof InterruptMode;
-    Pin: typeof Pin;
-    pinMode(pin: Pin, mode: PinMode): {
-        command: string;
-        pin: Pin;
-        mode: PinMode;
-    };
-    digitalWrite(pin: Pin, value: LogicLevel): {
-        command: string;
-        pin: Pin;
-        value: LogicLevel;
-    };
-    attachInterrupt(pin: Pin, mode: InterruptMode): {
-        command: string;
-        pin: Pin;
-        mode: InterruptMode;
-    };
-    detachInterrupt(pin: Pin): {
-        command: string;
-        pin: Pin;
-    };
+export declare function pinMode(pin: Pin, mode: PinMode): {
+    command: string;
+    pin: Pin;
+    mode: PinMode;
 };
-export default _default;
+export declare function digitalWrite(pin: Pin, value: LogicLevel): {
+    command: string;
+    pin: Pin;
+    value: LogicLevel;
+};
+export declare function attachInterrupt(pin: Pin, mode: InterruptMode): {
+    command: string;
+    pin: Pin;
+    mode: InterruptMode;
+};
+export declare function detachInterrupt(pin: Pin): {
+    command: string;
+    pin: Pin;
+};

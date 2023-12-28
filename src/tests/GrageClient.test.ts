@@ -1,5 +1,4 @@
-import GrageClient from "../GrageClient";
-import {GrageDeviceStatus} from "../GrageAPI";
+import {esp8266, GrageClient, GrageDeviceStatus} from '../index'
 
 test('e2e', done => {
     const recvClient = new GrageClient()
@@ -9,10 +8,7 @@ test('e2e', done => {
     sendClient.begin('ws://grage.azurewebsites.net/ws')
 
     const deviceID = 'testdevice1234'
-    const testMsg = {
-        str: 'my message',
-        num: 123
-    }
+    const testMsg = esp8266.digitalWrite(esp8266.Pin.D1, esp8266.LogicLevel.LOW)
 
     recvClient.subscribe(deviceID, msg => {
         console.log(msg)

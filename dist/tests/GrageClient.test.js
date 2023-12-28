@@ -1,17 +1,13 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const GrageClient_1 = require("../GrageClient");
-const GrageAPI_1 = require("../GrageAPI");
+const index_1 = require("../index");
 test('e2e', done => {
-    const recvClient = new GrageClient_1.default();
-    const sendClient = new GrageClient_1.default();
+    const recvClient = new index_1.GrageClient();
+    const sendClient = new index_1.GrageClient();
     recvClient.begin('ws://grage.azurewebsites.net/ws');
     sendClient.begin('ws://grage.azurewebsites.net/ws');
     const deviceID = 'testdevice1234';
-    const testMsg = {
-        str: 'my message',
-        num: 123
-    };
+    const testMsg = index_1.esp8266.digitalWrite(index_1.esp8266.Pin.D1, index_1.esp8266.LogicLevel.LOW);
     recvClient.subscribe(deviceID, msg => {
         console.log(msg);
         try {
@@ -24,16 +20,16 @@ test('e2e', done => {
     });
     let sent = false;
     recvClient.onStatusChanged(deviceID, status => {
-        console.log('recv status', GrageAPI_1.GrageDeviceStatus[status]);
+        console.log('recv status', index_1.GrageDeviceStatus[status]);
         if (sent)
             return;
-        if (status === GrageAPI_1.GrageDeviceStatus.NETWORK_DISCONNECTED)
+        if (status === index_1.GrageDeviceStatus.NETWORK_DISCONNECTED)
             return;
         sendClient.onStatusChanged(deviceID, status => {
-            console.log('send status', GrageAPI_1.GrageDeviceStatus[status]);
+            console.log('send status', index_1.GrageDeviceStatus[status]);
             if (sent)
                 return;
-            if (status === GrageAPI_1.GrageDeviceStatus.NETWORK_DISCONNECTED)
+            if (status === index_1.GrageDeviceStatus.NETWORK_DISCONNECTED)
                 return;
             sendClient.send(deviceID, testMsg, true);
             sent = true;

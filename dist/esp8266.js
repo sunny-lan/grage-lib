@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Pin = exports.LogicLevel = exports.InterruptMode = exports.PinMode = void 0;
+exports.detachInterrupt = exports.attachInterrupt = exports.digitalWrite = exports.pinMode = exports.Pin = exports.LogicLevel = exports.InterruptMode = exports.PinMode = void 0;
 var PinMode;
 (function (PinMode) {
     PinMode[PinMode["INPUT"] = 0] = "INPUT";
@@ -35,35 +35,32 @@ var Pin;
     Pin[Pin["D10"] = 1] = "D10";
     Pin[Pin["_A0"] = 17] = "_A0";
 })(Pin || (exports.Pin = Pin = {}));
-// @ts-ignore
-exports.default = {
-    LogicLevel,
-    PinMode,
-    InterruptMode,
-    Pin,
-    pinMode(pin, mode) {
-        return {
-            command: 'pinMode',
-            pin, mode,
-        };
-    },
-    digitalWrite(pin, value) {
-        return {
-            command: 'digitalWrite',
-            pin, value,
-        };
-    },
-    attachInterrupt(pin, mode) {
-        return {
-            command: 'attachInterrupt',
-            pin, mode,
-        };
-    },
-    detachInterrupt(pin) {
-        return {
-            command: 'detachInterrupt',
-            pin
-        };
-    },
-};
+function pinMode(pin, mode) {
+    return {
+        command: 'pinMode',
+        pin, mode,
+    };
+}
+exports.pinMode = pinMode;
+function digitalWrite(pin, value) {
+    return {
+        command: 'digitalWrite',
+        pin, value,
+    };
+}
+exports.digitalWrite = digitalWrite;
+function attachInterrupt(pin, mode) {
+    return {
+        command: 'attachInterrupt',
+        pin, mode,
+    };
+}
+exports.attachInterrupt = attachInterrupt;
+function detachInterrupt(pin) {
+    return {
+        command: 'detachInterrupt',
+        pin
+    };
+}
+exports.detachInterrupt = detachInterrupt;
 //# sourceMappingURL=esp8266.js.map
